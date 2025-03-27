@@ -32,14 +32,14 @@
 
     <!-- dependencies -->
     <activemq.version>5.16.0</activemq.version>
-    <camel.version>3.9.0</camel.version>
+    <camel.version>3.22.2</camel.version>
     <commons.lang3.version>3.4</commons.lang3.version>
     <jackson2.version>2.9.10.8</jackson2.version>
     <jena.version>4.2.0</jena.version>
     <logback.version>1.2.0</logback.version>
     <marmotta.version>3.4.0</marmotta.version>
     <slf4j.version>1.7.20</slf4j.version>
-    <spring.version>5.3.7</spring.version>
+    <spring.version>5.3.39</spring.version>
     <fcrepo.version>6.1.0</fcrepo.version>
     <fcrepo-java-client.version>6.1.0</fcrepo-java-client.version>
     <fcrepo-camel.version>6.0.0</fcrepo-camel.version>
@@ -62,6 +62,7 @@
     <jena.fuseki.version>${jena.version}</jena.fuseki.version>
     <jersey.version>2.34</jersey.version>
     <xerces.version>2.12.2</xerces.version>
+    <springboot.version>2.7.18</springboot.version>
     <!-- jared's -->
     <failsafe.plugin.version>2.18.1</failsafe.plugin.version>
     <!-- plugins -->
@@ -111,6 +112,22 @@
 
   <dependencyManagement>
     <dependencies>
+
+      <!-- Camel BOM -->
+      <dependency>
+        <groupId>org.apache.camel.springboot</groupId>
+        <artifactId>camel-spring-boot-bom</artifactId>
+        <version>${camel.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.camel.springboot</groupId>
+        <artifactId>camel-spring-boot-starter</artifactId>
+        <version>${camel.version}</version>
+      </dependency>
+
       <dependency>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-core</artifactId>
@@ -122,11 +139,7 @@
         <artifactId>camel-support</artifactId>
         <version>${camel.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>camel-spring-javaconfig</artifactId>
-        <version>${camel.version}</version>
-      </dependency>
+
       <dependency>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-http</artifactId>
@@ -361,14 +374,21 @@
       <!-- Testing -->
       <dependency>
         <groupId>org.apache.camel</groupId>
-        <artifactId>camel-test</artifactId>
+        <artifactId>camel-test-junit5</artifactId>
         <version>${camel.version}</version>
         <scope>test</scope>
       </dependency>
 
       <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>${springboot.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
         <groupId>org.apache.camel</groupId>
-        <artifactId>camel-test-spring</artifactId>
+        <artifactId>camel-test-spring-junit5</artifactId>
         <version>${camel.version}</version>
         <scope>test</scope>
       </dependency>

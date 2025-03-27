@@ -11,6 +11,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.ModelCamelContext;
+import org.apache.camel.test.spring.UseAdviceWith;
 import org.apache.jena.atlas.web.AuthScheme;
 import org.apache.jena.fuseki.main.FusekiServer;
 import org.apache.jena.query.Dataset;
@@ -26,9 +27,10 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import java.net.URI;
 import java.util.Properties;
 
@@ -47,7 +49,9 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Andy Pfister
  * @since 2021-10-06
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
+@UseAdviceWith
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {RouteUpdateIT.ContextConfig.class}, loader = AnnotationConfigContextLoader.class)
 public class RouteDeleteAuthIT {
 
@@ -67,9 +71,11 @@ public class RouteDeleteAuthIT {
         "fcrepo.dynamic.test.port", "8080"
     );
 
+    @MockBean
     @Produce("direct:start")
     protected ProducerTemplate template;
 
+    @MockBean
     @Autowired
     private CamelContext camelContext;
 

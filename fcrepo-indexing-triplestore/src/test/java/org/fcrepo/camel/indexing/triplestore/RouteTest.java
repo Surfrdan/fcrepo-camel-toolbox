@@ -14,19 +14,19 @@ import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.component.activemq.ActiveMQComponent;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.ModelCamelContext;
-import org.apache.camel.spring.javaconfig.CamelConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,21 +49,23 @@ import static org.fcrepo.camel.indexing.triplestore.integration.TestUtils.ASSERT
  * @author Aaron Coburn
  * @since 2015-04-22
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {RouteTest.ContextConfig.class}, loader = AnnotationConfigContextLoader.class)
 public class RouteTest {
 
     private static final String REPOSITORY = "http://fedora.info/definitions/v4/repository#";
 
+    @MockBean
     @EndpointInject("mock:result")
     protected MockEndpoint resultEndpoint;
 
+    @MockBean
     @Produce("direct:start")
     protected ProducerTemplate template;
 
     @Autowired
     private CamelContext camelContext;
-
 
     private static final String baseURL = "http://localhost/rest";
     private static final String fileID = "/file1";
@@ -374,8 +376,7 @@ public class RouteTest {
     }
 
     @Configuration
-    @ComponentScan(basePackages = "org.fcrepo.camel")
-    static class ContextConfig extends CamelConfiguration {
+    static class ContextConfig {
         @Bean
         public ActiveMQComponent broker() {
             final var component = new ActiveMQComponent();

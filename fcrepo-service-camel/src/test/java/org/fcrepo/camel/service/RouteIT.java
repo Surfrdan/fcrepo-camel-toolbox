@@ -9,8 +9,10 @@ import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.RoutesBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.spring.javaconfig.CamelConfiguration;
+import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
+//import org.apache.camel.test.spring.junit5.CamelSpringTest;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -20,16 +22,20 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.fcrepo.camel.processor.EventProcessor;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+//import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,7 +45,7 @@ import static org.apache.camel.component.mock.MockEndpoint.assertIsSatisfied;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_BASE_URL;
 import static org.fcrepo.camel.FcrepoHeaders.FCREPO_IDENTIFIER;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -48,8 +54,10 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Aaron Coburn
  * @since 2016-07-21
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {ContextConfig.class}, loader = AnnotationConfigContextLoader.class)
+@CamelSpringBootTest
+@SpringBootTest
+@EnableAutoConfiguration
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RouteIT {
 
     private static final Logger LOGGER = getLogger(RouteIT.class);
@@ -57,13 +65,15 @@ public class RouteIT {
     private static String FEDORA_USERNAME = "fedoraAdmin";
     private static String FEDORA_PASSWORD = "fedoraAdmin";
     private static String FEDORA_BASE_URL = "";
+
     @EndpointInject("mock:result")
     protected MockEndpoint resultEndpoint;
 
-    @Produce("direct:start")
+    //@Produce("direct:start")
+    @Autowired
     protected ProducerTemplate template;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         System.setProperty("fcrepo.authUsername", FEDORA_USERNAME);
         System.setProperty("fcrepo.authPassword", FEDORA_PASSWORD);
@@ -108,21 +118,23 @@ public class RouteIT {
         }
     }
 
+    @Configuration
+    static class ContextConfig {
+        @Bean
+        public RoutesBuilder route() {
+            return new RouteBuilder() {
 
-}
-
-@Configuration
-@ComponentScan("org.fcrepo.camel")
-class ContextConfig extends CamelConfiguration {
-    @Bean
-    public RouteBuilder route() {
-        return new RouteBuilder() {
-            public void configure() throws Exception {
-                from("direct:start")
-                        .process(new EventProcessor())
-                        .to("fcrepo:localhost/rest")
-                        .to("mock:result");
-            }
-        };
+                @Override
+                public void configure() throws Exception {
+                    from("direct:start")
+                            .process(new EventProcessor())
+                            .to("fcrepo:localhost/rest")
+                            .to("mock:result");
+                }
+            };
+        }
     }
+
 }
+
+

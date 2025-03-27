@@ -12,8 +12,11 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.component.activemq.ActiveMQComponent;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.model.ModelCamelContext;
-import org.apache.camel.spring.javaconfig.CamelConfiguration;
+//import org.apache.camel.model.ModelCamelContext;
+import org.apache.camel.test.spring.CamelSpringBootRunner;
+//import org.springframework.test.context.junit4.SpringRunner;
+import org.apache.camel.test.spring.junit5.CamelSpringTest;
+//import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.apache.jena.fuseki.main.FusekiServer;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -27,13 +30,15 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.annotation.ClassMode;
 import java.net.URI;
 
 import static com.jayway.awaitility.Awaitility.await;
@@ -52,8 +57,13 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Aaron Coburn
  * @since 2015-04-10
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {RouteUpdateIT.ContextConfig.class}, loader = AnnotationConfigContextLoader.class)
+//@RunWith(CamelSpringBootRunner.class)
+//@RunWith(SpringRunner.class)
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration(classes = {RouteUpdateIT.ContextConfig.class})
+@CamelSpringTest
+@ContextConfiguration
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class RouteUpdateIT {
 
     final private Logger logger = getLogger(RouteUpdateIT.class);
@@ -76,6 +86,8 @@ public class RouteUpdateIT {
             "fcrepo.dynamic.jms.port", "61616"
     );
 
+    //@MockBean
+    //@Autowired
     @Produce("direct:start")
     protected ProducerTemplate template;
 
@@ -125,17 +137,17 @@ public class RouteUpdateIT {
         final String fcrepoEndpoint = "mock:fcrepo:http://localhost:" + FCREPO_PORT + "/fcrepo/rest";
         final String fusekiBase = "http://localhost:" + FUSEKI_PORT + "/fuseki/test";
 
-        final var context = camelContext.adapt(ModelCamelContext.class);
+        // final var context = camelContext.adapt(ModelCamelContext.class);
 
-        AdviceWith.adviceWith(context, "FcrepoTriplestoreRouter", a -> {
+        AdviceWith.adviceWith(camelContext, "FcrepoTriplestoreRouter", a -> {
             a.mockEndpoints("*");
         });
 
-        AdviceWith.adviceWith(context, "FcrepoTriplestoreIndexer", a -> {
+        AdviceWith.adviceWith(camelContext, "FcrepoTriplestoreIndexer", a -> {
             a.mockEndpoints("*");
         });
 
-        AdviceWith.adviceWith(context, "FcrepoTriplestoreUpdater", a -> {
+        AdviceWith.adviceWith(camelContext, "FcrepoTriplestoreUpdater", a -> {
             a.mockEndpoints("*");
         });
 
@@ -162,8 +174,7 @@ public class RouteUpdateIT {
     }
 
     @Configuration
-    @ComponentScan(basePackages = "org.fcrepo.camel")
-    static class ContextConfig extends CamelConfiguration {
+    static class ContextConfig {
         @Bean
         public ActiveMQComponent broker() {
             final var component = new ActiveMQComponent();
